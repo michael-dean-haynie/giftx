@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\UtilityController as UC;
+$isGroupLeader = ($group->group_leader_id == auth()->user()->id ? true : false);
 ?>
 
 @extends('master')
@@ -37,7 +38,6 @@ use App\Http\Controllers\UtilityController as UC;
                                 @endforeach
                             </ul>
                         </div>
-                        <div class="panel-footer"></div>
                     </div>
                 </div>
                 <div class="col-xs-9">
@@ -48,23 +48,33 @@ use App\Http\Controllers\UtilityController as UC;
                                 <span id="group-title-date">({{UC::dateStringToString($group->event_date)}})</span>
                             </div>
                             <div class="u-third-width2 u-dib u-tar">
-                                <a href="{{url('/')}}">
+                                @if($isGroupLeader)
+                                    <a href="{{url('/edit-group/'.$group->group_id)}}">
+                                        <button class="btn btn-primary">Edit Group</button>
+                                    </a>
+                                @endif
+                                <a href="{{url('/leave-group/'.$group->group_id)}}">
                                     <button class="btn btn-danger">Leave Group</button>
                                 </a>
                             </div>
                         </div>
-                        <div class="panel-body u-pad0">
+                        <div class="panel-body u-pad1">
                             <div class="row">
-                                <div class="col-xs-12 u-bold u-fs2 u-tac u-mb1 u-mt1">
-                                    <a href="{{url('/user/'.$otherUser->id)}}">{{$otherUser->first_name . " " . $otherUser->last_name}}</a>&nbsp;&nbsp;
-                                    @include('includes/prof-pic',
-                                    ['filename' => $otherUser->prof_pic_filename,
-                                    'class' => $class = 'u-fis4'])
-                                </div>
-                                <div class="col-xs-offset-1 col-xs-10">
+                                <div class="col-xs-6">
                                     @if($otherUser->id == auth()->user()->id)
-                                        <div class="panel panel-default">
-                                            <div class="panel-heading u-fs1p5 u-bold">Wish List</div>
+                                        <div class="panel panel-default u-mt1">
+                                            <div class="panel-heading u-bold">
+                                                <div class="u-dib u-2thirds-width u-bold">
+                                                    {{$otherUser->first_name." ".$otherUser->last_name}}
+                                                </div>
+                                                <div class="u-dib u-third-width2 u-tar">
+                                                    <span>
+                                                        @include('includes/prof-pic',
+                                                        ['filename' => $otherUser->prof_pic_filename,
+                                                        'class' => $class = 'u-fis4'])
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <div class="panel-body">
                                                 <ul class="list-group">
                                                     <a href="{{url('/add-wish/')}}" class="btn btn-success u-full-width u-mb1">
@@ -114,8 +124,19 @@ use App\Http\Controllers\UtilityController as UC;
                                             </div>
                                         </div>
                                     @else
-                                        <div class="panel panel-default">
-                                            <div class="panel-heading u-fs1p5 u-bold">Wish List</div>
+                                        <div class="panel panel-default u-mt1">
+                                            <div class="panel-heading u-bold">
+                                                <div class="u-dib u-2thirds-width u-bold">
+                                                    {{$otherUser->first_name." ".$otherUser->last_name}}
+                                                </div>
+                                                <div class="u-dib u-third-width2 u-tar">
+                                                    <span>
+                                                        @include('includes/prof-pic',
+                                                        ['filename' => $otherUser->prof_pic_filename,
+                                                        'class' => $class = 'u-fis4'])
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <div class="panel-body">
                                                 <ul class="list-group">
                                                     @foreach($otherUserWishes as $wish)
@@ -167,10 +188,30 @@ use App\Http\Controllers\UtilityController as UC;
                                         </div>
                                     @endif
                                 </div>
+                                <div class="col-xs-6">
+                                    <div class="panel panel-default u-mt1">
+                                        <div class="panel-heading">
+                                            <div class="u-dib u-2thirds-width u-bold">
+                                                Group Rules
+                                            </div>
+                                            <div class="u-dib u-third-width2 u-tar">
+                                                @if($isGroupLeader)
+                                                    <a href="{{url('/edit-group/'.$group->group_id)}}">
+                                                        <button class="btn btn-primary">Edit Rules</button>
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="panel-body">
+                                            <ul>
+                                                @foreach($groupRules as $rule)
+                                                    <li>{{$rule->rule}}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div id="" class="panel-footer">
-
                         </div>
                     </div>
                 </div>

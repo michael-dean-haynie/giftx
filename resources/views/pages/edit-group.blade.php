@@ -1,8 +1,8 @@
 @extends('master')
 
 @section('to-master-css')
-    @if(file_exists(asset('css/create-group.css')))
-        <link rel="stylesheet" type="text/css" href="{{asset('css/create-group.css')}}">
+    @if(file_exists(asset('css/edit-group.css')))
+        <link rel="stylesheet" type="text/css" href="{{asset('css/edit-group.css')}}">
     @endif
 @endsection
 
@@ -10,40 +10,56 @@
     <div class="row">
         <div class="col-xs-12 col-md-offset-2 col-md-8 u-sheet">
             <div class="panel panel-default">
-                <div class="panel-heading u-bold u-fs1p5">Create a Group!</div>
+                <div class="panel-heading u-bold u-fs1p5">Edit Group</div>
                 <div class="panel-body">
-                    <form role="form" method="POST" action="{{ url('/create-group')}}">
+                    <form id="edit-group" role="form" method="POST" action="{{ url('/edit-group')}}">
                         {!! csrf_field() !!}
 
-                        @include('includes.success')
-                        @include('includes.error')
+                        @include('includes/success')
+                        @include('includes/error')
 
-                        <div class="form-group">
+                        <input type="hidden" name="group-id" value="{{$group->group_id}}">
+
+                        <div class="form-group u-mb1">
                             <label for="name">Group Name</label>
-                            <input type="text" class="form-control" name="name" placeholder="My Awesome Group" value="{{old('name') ? old('name') : ''}}">
+                            <input type="text" class="form-control" name="name" value="{{$group->name}}">
                         </div>
 
                         <div class="form-group">
                             <label for="date">Event Date</label>
-                            <input type="text" class="form-control" name="date" placeholder="yyyy-mm-dd" value="{{old('date') ? old('date') : ''}}">
+                            <input type="text" class="form-control" name="date" placeholder="yyyy-mm-dd" value="{{$group->event_date}}">
                         </div>
 
                         <div class="form-group">
                             <label for="key">Group Key <small>(Members will need this key to join the group)</small></label>
-                            <input type="text" class="form-control" name="key" placeholder="ex. thisistheawesomegroup" value="{{old('key') ? old('key') : ''}}">
+                            <input type="text" class="form-control" name="key" placeholder="ex. thisistheawesomegroup" value="{{$group->group_key}}">
                         </div>
 
                         <div id="rules-cntn" class="well">
                             <label>Rules</label>
+
+                            @for($ruleIndex = 0; $ruleIndex < count($groupRules); $ruleIndex++)
+                                <?php $rule = $groupRules[$ruleIndex];?>
+                                <div id="rule-input-cntn-{{$ruleIndex}}" class="rule-input-cntn row u-mb1">
+                                    <div class="col-xs-9">
+                                        <input type="text" class="form-control" name="rule{{$ruleIndex}}" data-rule-no="{{$ruleIndex}}" value="{{$groupRules[$ruleIndex]->rule}}">
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <button id="remove-rule-input-{{$ruleIndex}}" class="btn btn-danger remove-rule-button u-full-width" data-rule-no="{{$ruleIndex}}">Remove Rule</button>
+                                    </div>
+                                </div>
+                            @endfor
+
                             <button id="add-rule-button" class="btn btn-primary">Add Rule</button>
                         </div>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Create Group</button>
-                        </div>
                     </form>
+                    <div class="">
+                        <button type="submit" form="edit-group" class="btn btn-primary">Update Group</button>
+                        <a href="{{url('/edit-group-leader/'.$group->group_id)}}">
+                            <button class="btn btn-link">Change Group Leader</button>
+                        </a>
+                    </div>
                 </div>
-
             </div>
         </div>
     </div>

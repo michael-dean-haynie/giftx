@@ -117,6 +117,7 @@ class PagesController extends Controller
                 FROM users u
                 INNER JOIN assoc_users_groups aug
                     ON u.id = aug.user_id AND aug.group_id = ?
+                ORDER BY u.last_name ASC
             ;', [$groupID]);
 
             $dataModel['group'] = DB::select('
@@ -125,6 +126,10 @@ class PagesController extends Controller
                 INNER JOIN users u
                     ON u.id = g.group_leader_id AND group_id = ?
             ;', [$groupID])[0];
+
+            $dataModel['groupRules'] = DB::select('
+                SELECT * FROM rules WHERE group_id = ?
+            ;', [$groupID]);
         }
 
         return $dataModel;
@@ -278,6 +283,26 @@ class PagesController extends Controller
         return view('pages/join-group')->with($dataModel);
     }
 
+    static function getLeaveGroup($groupID){
+        $dataModel = PagesController::prepareDataModel(['group-data', 'groupID' => $groupID]);
+        return view('pages/leave-group')->with($dataModel);
+    }
+
+    static function getRefreshProfile(){
+        $dataModel = PagesController::prepareDataModel(['default-data']);
+        return view('pages/refresh-profile')->with($dataModel);
+    }
+
+    static function getEditGroup($groupID){
+        $dataModel = PagesController::prepareDataModel(['group-data', 'groupID' => $groupID]);
+        return view('pages/edit-group')->with($dataModel);
+    }
+
+    static function getEditGroupLeader($groupID){
+        $dataModel = PagesController::prepareDataModel(['group-data', 'groupID' => $groupID]);
+        return view('pages/edit-group-leader')->with($dataModel);
+    }
+
 
     /*
     |----------------------------
@@ -407,9 +432,6 @@ class PagesController extends Controller
         ]);
 
         $input = request()->all();
-//        echo "<pre>" . print_r($input, true) . "</pre>";
-//        return;
-
 
         // add wish
         DB::statement('INSERT INTO wishes (user_id, priority, title) VALUES (?, ?, ?);', [auth()->user()->id, $input['priority'], $input['title']]);
@@ -529,11 +551,9 @@ class PagesController extends Controller
 
         $this->validate(request(),[
             'name' => 'required|max:255',
-            'date' => ['required', 'Regex:/^[0-9]{4}\/[0-1][0-9]\/[0-3][0-9]$/'],
+            'date' => ['required', 'Regex:/^[0-9]{4}-[0-1][0-9]-[0-3][0-9]$/'],
             'key' => 'required|max:255'
-        ],[],[
-            'wish-id' => 'Wish ID'
-        ]);
+        ],[],[]);
 
         $input = request()->all();
 
@@ -543,6 +563,15 @@ class PagesController extends Controller
 
         /* get group id*/
         $groupID = DB::select('SELECT MAX(group_id) AS group_id FROM groups;')[0]->group_id;
+
+        /* add rules to group */
+        foreach(array_keys($input) as $key){
+            if (strlen($input[$key]) > 0){
+                if (substr($key, 0, 4) == 'rule'){
+                    DB::statement('INSERT INTO rules (group_id, rule) VALUES (?,?);', [$groupID, $input[$key]]);
+                }
+            }
+        }
 
         /* add row to assoc_users_groups */
         DB::statement('INSERT INTO assoc_users_groups (user_id, group_id) VALUES (?,?);',
@@ -567,6 +596,111 @@ class PagesController extends Controller
         return redirect(url('/group/'.$input['group-id']));
     }
 
+    public function postLeaveGroup(){
 
+        $input = request()->all();
+
+        // remove from group
+        DB::statement('DELETE FROM assoc_users_groups WHERE user_id = ? AND group_id = ?', [auth()->user()->id, $input['group-id']]);
+
+        // remove associated assignments
+        DB::statement('DELETE FROM assignments WHERE group_id = ? AND (from_id = ? OR to_id = ?);', [$input['group-id'], auth()->user()->id, auth()->user()->id]);
+
+        //check if leader
+        $leader = DB::select('SELECT group_leader_id FROM groups WHERE group_id = ?;', [$input['group-id']])[0]->group_leader_id;
+        if ($leader == auth()->user()->id){
+            $members = DB::select('SELECT user_id FROM assoc_users_groups WHERE group_id = ?;', [$input['group-id']]);
+            if (count($members) > 0){
+                DB::statement('UPDATE groups SET group_leader_id = ? WHERE group_id = ?;', [$members[0]->user_id, $input['group-id']]);
+            }else{
+                DB::statement('DELETE FROM groups WHERE group_id = ?;', [$input['group-id']]);
+            }
+        }
+        return redirect(url('/groups'));
+    }
+
+    public function postRefreshProfile(){
+        $input = request()->all();
+        $userID = auth()->user()->id;
+
+        // empty wish-list
+        if (request()->has('reset-wishes')){
+            DB::statement('DELETE FROM notes WHERE wish_id IN (SELECT wish_id FROM wishes WHERE user_id = ?);', [$userID]);
+            DB::statement('DELETE FROM wishes WHERE user_id = ?;', [$userID]);
+        }
+
+        // give up all dibbs
+        if (request()->has('reset-dibbs')){
+            DB::statement('UPDATE wishes SET has_dibbs_id = 0 WHERE has_dibbs_id = ?;', [$userID]);
+        }
+
+        // leave all groups
+        if (request()->has('reset-groups')){
+
+            DB::statement('DELETE FROM assignments WHERE from_id = ?;', [$userID]);
+            DB::statement('DELETE FROM assoc_users_groups WHERE user_id = ?;', [$userID]);
+
+            //check if leader
+            $groups = DB::select('SELECT * FROM groups;');
+            foreach($groups as $group){
+                $groupID = $group->group_id;
+                $leader = DB::select('SELECT group_leader_id FROM groups WHERE group_id = ?;', [$groupID])[0]->group_leader_id;
+                if ($leader == auth()->user()->id){
+                    $members = DB::select('SELECT user_id FROM assoc_users_groups WHERE group_id = ?;', [$groupID]);
+                    if (count($members) > 0){
+                        DB::statement('UPDATE groups SET group_leader_id = ? WHERE group_id = ?;', [$members[0]->user_id, $groupID]);
+                    }else{
+                        DB::statement('DELETE FROM groups WHERE group_id = ?;', [$groupID]);
+                    }
+                }
+            }
+        }
+
+        return redirect(url('/profile'));
+    }
+
+    public function postEditGroup(){
+
+        $this->validate(request(),[
+            'name' => 'required|max:255',
+            'date' => ['required', 'Regex:/^[0-9]{4}-[0-1][0-9]-[0-3][0-9]$/'],
+            'key' => 'required|max:255'
+        ],[],[]);
+
+        $input = request()->all();
+
+        /* update groups*/
+        DB::statement('UPDATE groups SET name = ?, event_date = ?, group_key = ? WHERE group_id = ?;',
+            [$input['name'], $input['date'], $input['key'], $input['group-id']]);
+
+        // delete old rules
+        DB::statement('DELETE FROM rules WHERE group_id = ?;', [$input['group-id']]);
+
+        // add new rules
+        foreach(array_keys($input) as $key){
+            if (strlen($input[$key]) > 0){
+                if (substr($key, 0, 4) == 'rule'){
+                    DB::statement('INSERT INTO rules (group_id, rule) VALUES (?,?);', [$input['group-id'], $input[$key]]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('status', 'Group has been updated!');
+    }
+
+    public function postEditGroupLeader(){
+        $input = request()->all();
+        $groupLeader = DB::select('SELECT group_leader_id FROM groups WHERE group_id = ?;', [$input['group-id']])[0]->group_leader_id;
+
+        $this->validate(request(),[
+            'user-id' => 'in:'.$groupLeader
+        ],[],[]);
+
+        /* update group */
+        DB::statement('UPDATE groups SET group_leader_id = ? WHERE group_id = ?;',
+            [$input['new-leader-id'], $input['group-id']]);
+
+        return redirect(url('/group/'. $input['group-id']));
+    }
 
 }

@@ -36,9 +36,9 @@ use App\Http\Controllers\UtilityController as UC;
                                             </a>
                                         </div>
                                         <div class="col-xs-12 u-mb2">
-                                            <a href={{url('/edit-picture')}}>
+                                            <a href={{url('/refresh-profile')}}>
                                             <button class="btn btn-primary u-full-width u-fs1p5">
-                                                Update Profile Picture</button>
+                                                Refresh Profile</button>
                                             </a>
                                         </div>
                                     </div>

@@ -21,6 +21,8 @@ Route::group(['middleware' => ['auth']], function(){
     Route::post('delete-picture', 'PagesController@postDeletePicture');
     Route::get('reset-password', 'PagesController@getResetPassword');
     Route::post('reset-password', 'PagesController@postResetPassword');
+    Route::get('refresh-profile', 'PagesController@getRefreshProfile');
+    Route::post('refresh-profile', 'PagesController@postRefreshProfile');
 
     Route::get('crop-picture', 'PagesController@getCropPicture');
     Route::post('crop-picture', 'PagesController@postCropPicture');
@@ -35,6 +37,12 @@ Route::group(['middleware' => ['auth']], function(){
     Route::post('/create-group', 'PagesController@postCreateGroup');
     Route::get('join-group/{groupID}', 'PagesController@getJoinGroup');
     Route::post('join-group/{groupID}', 'PagesController@postJoinGroup');
+    Route::get('/leave-group/{groupID}', 'PagesController@getLeaveGroup');
+    Route::post('/leave-group', 'PagesController@postLeaveGroup');
+    Route::get('/edit-group/{groupID}', 'PagesController@getEditGroup');
+    Route::post('/edit-group', 'PagesController@postEditGroup');
+    Route::get('/edit-group-leader/{groupID}', 'PagesController@getEditGroupLeader');
+    Route::post('/edit-group-leader', 'PagesController@postEditGroupLeader');
 
     /* Messages */
     Route::get('messages', 'PagesController@getMessages');
