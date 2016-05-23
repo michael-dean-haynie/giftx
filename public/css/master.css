@@ -92,6 +92,11 @@ background-color: #F0F0F0;
 | Utilities / Misc.
 |---------------------------
 */
+#group-title-date{
+    font-weight:normal;
+    color:dimgrey;
+
+}
 .u-blue-text{
     color: #0D2F84;
 }
@@ -151,6 +156,9 @@ background-color: #F0F0F0;
     box-shadow:inset .2rem .2rem .2rem #B8B8B8;
 }
 .list-item-button:active{
+    background-color:#D8D8D8 ;
+}
+.list-item-button-act{
     background-color:#D8D8D8 ;
 }
 #main-img-container{

@@ -93,20 +93,21 @@ class PagesController extends Controller
             ;', [$userID]);
         }
 
-        if (in_array('userGroups', $dataNames)){
-            $dataModel['userGroups'] = DB::select('
-                SELECT g.group_id, g.name, g.event_date, g.group_key,
+        if (in_array('allGroups', $dataNames)){
+            $dataModel['allGroups'] = DB::select('
+                SELECT DISTINCT g.group_id, g.name, g.event_date, g.group_key,
                 g.group_leader_id, g.created_at, g.updated_at,
                 CONCAT(u.first_name, " ", u.last_name) AS group_leader_name,
                 u.prof_pic_filename AS group_leader_filename,
                 (SELECT COUNT(*) FROM assoc_users_groups WHERE assoc_users_groups.group_id = g.group_id) AS member_count
                 FROM groups g
                 INNER JOIN assoc_users_groups aug
-                  ON aug.group_id = g.group_id AND aug.user_id = ?
+                  ON aug.group_id = g.group_id AND aug.user_id IS NOT NULL
                 INNER JOIN users u
                   ON u.id = g.group_leader_id
                 ORDER BY g.event_date ASC
-            ;', [auth()->user()->id]);
+            ;');
+
         }
 
         if (in_array('group-data', $dataNames)){
@@ -117,6 +118,13 @@ class PagesController extends Controller
                 INNER JOIN assoc_users_groups aug
                     ON u.id = aug.user_id AND aug.group_id = ?
             ;', [$groupID]);
+
+            $dataModel['group'] = DB::select('
+                SELECT g.*, CONCAT(u.first_name, " ", u.last_name) AS leader_name, u.prof_pic_filename AS leader_prof_pic_filename
+                FROM groups g
+                INNER JOIN users u
+                    ON u.id = g.group_leader_id AND group_id = ?
+            ;', [$groupID])[0];
         }
 
         return $dataModel;
@@ -221,7 +229,8 @@ class PagesController extends Controller
     }
 
     static function getGroups(){
-        $dataModel = PagesController::prepareDataModel(['userGroups']);
+        $dataModel = PagesController::prepareDataModel(['allGroups']);
+        $dataModel['amn'] = 'groups';
         return view('pages/groups')->with($dataModel);
     }
 
@@ -230,11 +239,43 @@ class PagesController extends Controller
         return view('pages/create-group')->with($dataModel);
     }
 
-    static function getGroup($groupID){
+    static function getGroup($groupID, $userID = null){
+        if ($userID == null) $userID = auth()->user()->id;
         $dataModel = PagesController::prepareDataModel(['group-data', 'groupID' => $groupID]);
-//        echo "<pre>" . print_r($dataModel, true) . "</pre>";
-//        return;
+        $dataModel['amn'] = 'groups';
+        $dataModel['userWishes'] = DB::select("SELECT * FROM wishes WHERE user_id = ? ORDER BY priority ASC;", [auth()->user()->id]);
+        $dataModel['userNotes'] = DB::select("
+                SELECT notes.note_id, notes.wish_id, notes.suggestion_id, notes.note_type,
+                notes.note, notes.updated_at, notes.created_at
+                FROM notes
+                INNER JOIN wishes
+                  ON notes.wish_id = wishes.wish_id AND wishes.user_id = ?
+            ;", [auth()->user()->id]);
+
+
+        $dataModel['otherUser'] = DB::select('SELECT * FROM users WHERE id = ?', [$userID])[0];
+        $dataModel['otherUserWishes'] = DB::select("
+                SELECT wishes.*, (
+                    SELECT CONCAT(users.first_name, ' ', users.last_name)
+                    FROM users
+                    WHERE users.id = wishes.has_dibbs_id
+                ) AS has_dibbs_name
+                FROM wishes WHERE user_id = ? ORDER BY priority ASC
+            ;", [$userID]);
+        $dataModel['otherUserNotes'] = DB::select("
+                SELECT notes.note_id, notes.wish_id, notes.suggestion_id, notes.note_type,
+                notes.note, notes.updated_at, notes.created_at
+                FROM notes
+                INNER JOIN wishes
+                  ON notes.wish_id = wishes.wish_id AND wishes.user_id = ?
+            ;", [$userID]);
+
         return view('pages/group')->with($dataModel);
+    }
+
+    static function getJoinGroup($groupID){
+        $dataModel = PagesController::prepareDataModel(['group-data', 'groupID' => $groupID]);
+        return view('pages/join-group')->with($dataModel);
     }
 
 
@@ -508,6 +549,22 @@ class PagesController extends Controller
             [auth()->user()->id, $groupID]);
 
         return redirect(url('/group/'.$groupID));
+    }
+
+    public function postJoinGroup(){
+        $input = request()->all();
+        $key = DB::select('SELECT group_key FROM groups WHERE group_id = ?;', [$input['group-id']])[0]->group_key;
+
+        $this->validate(request(),[
+            'group-id' => 'required',
+            'key' => 'required|max:255|in:'.$key
+        ],[],[]);
+
+        /* add row to assoc_users_groups */
+        DB::statement('INSERT INTO assoc_users_groups (user_id, group_id) VALUES (?,?);',
+            [auth()->user()->id, $input['group-id']]);
+
+        return redirect(url('/group/'.$input['group-id']));
     }
 
 

@@ -55,4 +55,11 @@ class UtilityController extends Controller
     static function toMessageDateTime($dateTime){
         return date('g:i A m/d/y', strtotime($dateTime));
     }
+
+    static function userInGroup($groupID){
+        $rows = DB::select('SELECT * FROM assoc_users_groups WHERE user_id = ? AND group_id = ?;',
+            [auth()->user()->id, $groupID]);
+
+        return count($rows) > 0 ? true : false;
+    }
 }

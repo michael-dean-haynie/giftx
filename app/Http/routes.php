@@ -30,9 +30,11 @@ Route::group(['middleware' => ['auth']], function(){
 
     /* Group */
     Route::get('/groups', 'PagesController@getGroups');
-    Route::get('group/{groupID}', 'PagesController@getGroup');
+    Route::get('group/{groupID}/{userID?}', 'PagesController@getGroup');
     Route::get('/create-group', 'PagesController@getCreateGroup');
     Route::post('/create-group', 'PagesController@postCreateGroup');
+    Route::get('join-group/{groupID}', 'PagesController@getJoinGroup');
+    Route::post('join-group/{groupID}', 'PagesController@postJoinGroup');
 
     /* Messages */
     Route::get('messages', 'PagesController@getMessages');
