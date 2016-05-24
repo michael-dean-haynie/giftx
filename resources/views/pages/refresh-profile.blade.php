@@ -19,11 +19,12 @@
                         @include('includes/error')
 
                         <div class="form-group u-mb1">
-                            Select the features you would like to refresh
+                            <p class="u-bold">Select the features you would like to refresh</p>
+
                             <div class="well">
-                                <input type="checkbox" name="reset-wishes" value="reset-wishes"> <label for="reset-wishes">Empty Wish List</label><br>
-                                <input type="checkbox" name="reset-dibbs" value="reset-dibbs"> <label for="reset-dibbs">Give up all dibbs</label><br>
-                                <input type="checkbox" name="reset-groups" value="reset-groups"> <label for="reset-groups">Remove from all Groups</label><br>
+                                <input type="checkbox" name="reset-wishes" value="reset-wishes"> Empty Wish List<br>
+                                <input type="checkbox" name="reset-dibbs" value="reset-dibbs"> Give up all dibbs<br>
+                                <input type="checkbox" name="reset-groups" value="reset-groups"> Remove from all Groups<br>
                             </div>
                         </div>
 

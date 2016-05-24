@@ -147,9 +147,6 @@ use App\Http\Controllers\UtilityController as UC;
                                 <div class="collapse u-maxh30 auto-overflow" id="clps-target-groups-u{{auth()->user()->id}}">
                                     <div class="panel-body">
                                         <ul class="list-group">
-                                            <a href="{{url('/')}}" class="btn btn-success u-full-width u-mb1">
-                                                Join a new Group
-                                            </a>
                                             @foreach($userGroups as $group)
                                                 <li class="list-group-item clps-click-list-item u-sheet2 tap-to-click"
                                                     id="clps-click-group-info-u{{auth()->user()->id}}-g{{$group->group_id}}"
