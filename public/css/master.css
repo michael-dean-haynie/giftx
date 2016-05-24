@@ -92,6 +92,9 @@ background-color: #F0F0F0;
 | Utilities / Misc.
 |---------------------------
 */
+.priority-span{
+    font-size:.75rem;
+}
 #group-title-date{
     font-weight:normal;
     color:dimgrey;
@@ -284,6 +287,9 @@ background-color: #F0F0F0;
 .u-half-width{
     width:50%;
 }
+.u-half-width2{
+    width:47%;
+}
 .u-third-width{
     width:33.3%!important;
 }
@@ -316,6 +322,9 @@ background-color: #F0F0F0;
 }
 .u-red-text{
     color:red;
+}
+.u-green-text{
+    color:green;
 }
 .u-fis1{
     width:100%;

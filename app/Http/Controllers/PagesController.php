@@ -303,6 +303,11 @@ class PagesController extends Controller
         return view('pages/edit-group-leader')->with($dataModel);
     }
 
+    static function getMakeAssignments($groupID){
+        $dataModel = PagesController::prepareDataModel(['group-data', 'groupID' => $groupID]);
+        return view('pages/make-assignments')->with($dataModel);
+    }
+
 
     /*
     |----------------------------
@@ -699,6 +704,25 @@ class PagesController extends Controller
         /* update group */
         DB::statement('UPDATE groups SET group_leader_id = ? WHERE group_id = ?;',
             [$input['new-leader-id'], $input['group-id']]);
+
+        return redirect(url('/group/'. $input['group-id']));
+    }
+
+    public function postMakeAssignments(){
+        $input = request()->all();
+        $groupID = $input['group-id'];
+        $groupLeader = DB::select('SELECT group_leader_id FROM groups WHERE group_id = ?;', [$groupID])[0]->group_leader_id;
+
+        $this->validate(request(),[
+            'user-id' => 'in:'.$groupLeader
+        ],[],[]);
+
+        /* remove old assignments */
+        DB::statement('DELETE FROM assignments WHERE group_id = ?;', [$groupID]);
+
+        /* make assignments */
+        UC::makeAssignments($groupID);
+
 
         return redirect(url('/group/'. $input['group-id']));
     }

@@ -62,4 +62,13 @@ class UtilityController extends Controller
 
         return count($rows) > 0 ? true : false;
     }
+
+    static function amtLoved($userID){
+        $wishes = DB::select('SELECT COUNT(*) AS count FROM wishes WHERE user_id = ?;', [$userID])[0]->count;
+        $dibbs = DB::select('SELECT COUNT(*) AS count FROM wishes WHERE user_id = ? AND has_dibbs_id != 0;', [$userID])[0]->count;
+        if ($wishes == 0 || $dibbs ==  0) return 0;
+        return ceil($dibbs/$wishes*100);
+
+
+    }
 }

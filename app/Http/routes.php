@@ -43,6 +43,8 @@ Route::group(['middleware' => ['auth']], function(){
     Route::post('/edit-group', 'PagesController@postEditGroup');
     Route::get('/edit-group-leader/{groupID}', 'PagesController@getEditGroupLeader');
     Route::post('/edit-group-leader', 'PagesController@postEditGroupLeader');
+    Route::get('/make-assignments/{groupID}', 'PagesController@getMakeAssignments');
+    Route::post('/make-assignments', 'PagesController@postMakeAssignments');
 
     /* Messages */
     Route::get('messages', 'PagesController@getMessages');

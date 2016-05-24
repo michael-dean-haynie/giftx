@@ -48,24 +48,22 @@ $isGroupLeader = ($group->group_leader_id == auth()->user()->id ? true : false);
                                 <span id="group-title-date">({{UC::dateStringToString($group->event_date)}})</span>
                             </div>
                             <div class="u-third-width2 u-dib u-tar">
-                                @if($isGroupLeader)
-                                    <a href="{{url('/edit-group/'.$group->group_id)}}">
-                                        <button class="btn btn-primary">Edit Group</button>
-                                    </a>
-                                @endif
                                 <a href="{{url('/leave-group/'.$group->group_id)}}">
                                     <button class="btn btn-danger">Leave Group</button>
                                 </a>
                             </div>
                         </div>
                         <div class="panel-body u-pad1">
+
                             <div class="row">
-                                <div class="col-xs-6">
+                                <div class="col-xs-8">
                                     @if($otherUser->id == auth()->user()->id)
                                         <div class="panel panel-default u-mt1">
                                             <div class="panel-heading u-bold">
                                                 <div class="u-dib u-2thirds-width u-bold">
-                                                    {{$otherUser->first_name." ".$otherUser->last_name}}
+                                                    <a href="{{url('/user/'.$otherUser->id)}}">
+                                                        {{$otherUser->first_name." ".$otherUser->last_name}}
+                                                    </a>
                                                 </div>
                                                 <div class="u-dib u-third-width2 u-tar">
                                                     <span>
@@ -92,17 +90,17 @@ $isGroupLeader = ($group->group_leader_id == auth()->user()->id ? true : false);
                                                                 <span class="u-bold list-item-title u-full-width">{{$wish->title}}</span>
                                                             </div>
                                                             <div class="u-dib u-third-width2">
-                                                    <span class="u-float-right">
-                                                        <span class="priority-container">Priority: {{$wish->priority}}&nbsp;&nbsp;&nbsp;</span>
-                                                        <span class="u-dib">
-                                                            <a href="{{url('/edit-wish/'.$wish->wish_id)}}" class="btn btn-primary btn-glyph nested-click">
-                                                                <span class="glyphicon glyphicon-pencil"></span>
-                                                            </a>
-                                                            <a href="{{url('/delete-wish/'.$wish->wish_id)}}" class="btn btn-danger btn-glyph nested-click">
-                                                                <span class="glyphicon glyphicon-trash"></span>
-                                                            </a>
-                                                        </span>
-                                                    </span>
+                                                                <span class="u-float-right">
+                                                                    <span class="priority-container">Priority: {{$wish->priority}}&nbsp;&nbsp;&nbsp;</span>
+                                                                    <span class="u-dib">
+                                                                        <a href="{{url('/edit-wish/'.$wish->wish_id)}}" class="btn btn-primary btn-glyph nested-click">
+                                                                            <span class="glyphicon glyphicon-pencil"></span>
+                                                                        </a>
+                                                                        <a href="{{url('/delete-wish/'.$wish->wish_id)}}" class="btn btn-danger btn-glyph nested-click">
+                                                                            <span class="glyphicon glyphicon-trash"></span>
+                                                                        </a>
+                                                                    </span>
+                                                                </span>
                                                             </div>
                                                         </li>
                                                         <div class="collapse" id="clps-target-notes-u{{auth()->user()->id}}-w{{$wish->wish_id}}">
@@ -124,10 +122,12 @@ $isGroupLeader = ($group->group_leader_id == auth()->user()->id ? true : false);
                                             </div>
                                         </div>
                                     @else
-                                        <div class="panel panel-default u-mt1">
+                                        <div class="panel panel-default u-mt1 auto-overflow">
                                             <div class="panel-heading u-bold">
                                                 <div class="u-dib u-2thirds-width u-bold">
-                                                    {{$otherUser->first_name." ".$otherUser->last_name}}
+                                                    <a href="{{url('/user/'.$otherUser->id)}}">
+                                                        {{$otherUser->first_name." ".$otherUser->last_name}}
+                                                    </a>
                                                 </div>
                                                 <div class="u-dib u-third-width2 u-tar">
                                                     <span>
@@ -139,6 +139,12 @@ $isGroupLeader = ($group->group_leader_id == auth()->user()->id ? true : false);
                                             </div>
                                             <div class="panel-body">
                                                 <ul class="list-group">
+                                                    <div class="row">
+                                                        <div class="col-xs-12">
+                                                            @include('includes/loved-unloved-meter',
+                                                            ['amtLoved' => UC::amtLoved($otherUser->id)])
+                                                        </div>
+                                                    </div>
                                                     @foreach($otherUserWishes as $wish)
                                                         <li class="list-group-item clps-click-list-item u-sheet2 tap-to-click"
                                                             id="clps-click-notes-u{{$otherUser->id}}-w{{$wish->wish_id}}"
@@ -147,25 +153,32 @@ $isGroupLeader = ($group->group_leader_id == auth()->user()->id ? true : false);
                                                             aria-expanded="false"
                                                             aria-controls="clps-target-notes-u{{$otherUser->id}}-w{{$wish->wish_id}}">
 
-                                                            <div class="u-dib u-2thirds-width">
-                                                                <span class="u-bold list-item-title u-full-width">{{$wish->title}}</span>
-                                                            </div>
-                                                            <div class="u-dib u-third-width2">
-                                                    <span class="u-float-right">
-                                                        @if($wish->has_dibbs_id == 0)
-                                                            <a class="nested-click" href="{{url('/call-dibbs/'.$wish->wish_id)}}">
-                                                                <button class="btn btn-success">Call Dibbs</button>
-                                                            </a>
-                                                        @elseif($wish->has_dibbs_id == auth()->user()->id)
-                                                            <a class="nested-click" href="{{url('/give-up-dibbs/'.$wish->wish_id)}}">
-                                                                <button class="btn btn-danger">Give Up</button>
-                                                            </a>
-                                                        @else
-                                                            <span class="u-blue-text">
-                                                                {{$wish->has_dibbs_name}}
-                                                            </span>
-                                                        @endif
-                                                    </span>
+                                                            <div class="row">
+                                                                <div class="col-xs-7">
+                                                                    <span class="u-bold list-item-title u-full-width">{{$wish->title}}</span>
+                                                                </div>
+                                                                <div class="col-xs-5">
+                                                                    <div class="row">
+                                                                        <div class="col-xs-6">
+                                                                            <span class="priority-span">Priority:&nbsp;{{$wish->priority}}</span>
+                                                                        </div>
+                                                                        <div class="col-xs-6">
+                                                                            @if($wish->has_dibbs_id == 0)
+                                                                                <a class="nested-click" href="{{url('/call-dibbs/'.$wish->wish_id)}}">
+                                                                                    <button class="btn btn-success"><span class="glyphicon glyphicon-plus"></span></button>
+                                                                                </a>
+                                                                            @elseif($wish->has_dibbs_id == auth()->user()->id)
+                                                                                <a class="nested-click" href="{{url('/give-up-dibbs/'.$wish->wish_id)}}">
+                                                                                    <button class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span></button>
+                                                                                </a>
+                                                                            @else
+                                                                                <span class="u-blue-text">
+                                                                    {{$wish->has_dibbs_name}}
+                                                                </span>
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </li>
                                                         <div class="collapse" id="clps-target-notes-u{{$otherUser->id}}-w{{$wish->wish_id}}">
@@ -188,28 +201,39 @@ $isGroupLeader = ($group->group_leader_id == auth()->user()->id ? true : false);
                                         </div>
                                     @endif
                                 </div>
-                                <div class="col-xs-6">
+                                <div class="col-xs-4">
                                     <div class="panel panel-default u-mt1">
                                         <div class="panel-heading">
-                                            <div class="u-dib u-2thirds-width u-bold">
-                                                Group Rules
-                                            </div>
-                                            <div class="u-dib u-third-width2 u-tar">
-                                                @if($isGroupLeader)
-                                                    <a href="{{url('/edit-group/'.$group->group_id)}}">
-                                                        <button class="btn btn-primary">Edit Rules</button>
-                                                    </a>
-                                                @endif
-                                            </div>
+                                            Group Rules
                                         </div>
                                         <div class="panel-body">
                                             <ul>
                                                 @foreach($groupRules as $rule)
-                                                    <li>{{$rule->rule}}</li>
+                                                    <li>{{$rule->rule}}</li><br>
                                                 @endforeach
                                             </ul>
                                         </div>
                                     </div>
+                                    @if($isGroupLeader)
+                                        <div class="panel panel-default u-mt1">
+                                            <div class="panel-heading">
+                                                <div class="u-dib u-2thirds-width u-bold">
+                                                    Group Leader Options
+                                                </div>
+                                            </div>
+                                            <div class="panel-body">
+                                                <a href="{{url('/edit-group/'.$group->group_id)}}">
+                                                    <button class="btn btn-primary u-mt1">Edit Group</button>
+                                                </a>
+                                                <a href="{{url('/edit-group-leader/'.$group->group_id)}}">
+                                                    <button class="btn btn-primary u-mt1">Change Group Leader</button>
+                                                </a>
+                                                <a href="{{url('/make-assignments/'.$group->group_id)}}">
+                                                    <button class="btn btn-primary u-mt1">Make Assignments</button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

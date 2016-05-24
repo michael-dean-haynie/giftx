@@ -24,11 +24,9 @@ use App\Http\Controllers\UtilityController as UC;
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-xs-offset-4 col-xs-4">
-                            <a href="{{url('/edit-profile')}}">
-                                <button class="btn btn-success u-full-width u-fs1p5">
-                                    Chat with {{$otherUser->first_name}}</button>
-                            </a>
+                        <div class="col-xs-offset-2 col-xs-8">
+                            @include('includes/loved-unloved-meter',
+                            ['amtLoved' => UC::amtLoved($otherUser->id)])
                         </div>
                     </div>
                 </div>
@@ -45,7 +43,7 @@ use App\Http\Controllers\UtilityController as UC;
                                      aria-expanded="false"
                                      aria-controls="clps-target-wishes-u{{$otherUser->id}}">
                                     {{--{{auth()->user()->first_name . "'s"}} --}}Wish List
-                                    <span class="glyphicon glyphicon-chevron-down u-float-right u-ml1"
+                                    <span class="glyphicon glyphicon-chevron-up u-float-right u-ml1"
                                           id="glyph-flip-target-wishes-u{{$otherUser->id}}"></span>
                                     <span class="label label-as-badge label-primary u-float-right">{{count($otherUserWishes)}}</span>
                                 </div>
@@ -60,25 +58,32 @@ use App\Http\Controllers\UtilityController as UC;
                                                     aria-expanded="false"
                                                     aria-controls="clps-target-notes-u{{$otherUser->id}}-w{{$wish->wish_id}}">
 
-                                                    <div class="u-dib u-2thirds-width">
-                                                        <span class="u-bold list-item-title u-full-width">{{$wish->title}}</span>
-                                                    </div>
-                                                    <div class="u-dib u-third-width2">
-                                                        <span class="u-float-right">
-                                                            @if($wish->has_dibbs_id == 0)
-                                                                <a class="nested-click" href="{{url('/call-dibbs/'.$wish->wish_id)}}">
-                                                                    <button class="btn btn-success">Call Dibbs</button>
-                                                                </a>
-                                                            @elseif($wish->has_dibbs_id == auth()->user()->id)
-                                                                <a class="nested-click" href="{{url('/give-up-dibbs/'.$wish->wish_id)}}">
-                                                                    <button class="btn btn-danger">Give Up</button>
-                                                                </a>
-                                                            @else
-                                                                <span class="u-blue-text">
+                                                    <div class="row">
+                                                        <div class="col-xs-7">
+                                                            <span class="u-bold list-item-title u-full-width">{{$wish->title}}</span>
+                                                        </div>
+                                                        <div class="col-xs-5">
+                                                            <div class="row">
+                                                                <div class="col-xs-6">
+                                                                    <span class="priority-span">Priority:&nbsp;{{$wish->priority}}</span>
+                                                                </div>
+                                                                <div class="col-xs-6">
+                                                                    @if($wish->has_dibbs_id == 0)
+                                                                        <a class="nested-click" href="{{url('/call-dibbs/'.$wish->wish_id)}}">
+                                                                            <button class="btn btn-success"><span class="glyphicon glyphicon-plus"></span></button>
+                                                                        </a>
+                                                                    @elseif($wish->has_dibbs_id == auth()->user()->id)
+                                                                        <a class="nested-click" href="{{url('/give-up-dibbs/'.$wish->wish_id)}}">
+                                                                            <button class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span></button>
+                                                                        </a>
+                                                                    @else
+                                                                        <span class="u-blue-text">
                                                                     {{$wish->has_dibbs_name}}
                                                                 </span>
-                                                            @endif
-                                                        </span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </li>
                                                 <div class="collapse" id="clps-target-notes-u{{$otherUser->id}}-w{{$wish->wish_id}}">
@@ -111,7 +116,7 @@ use App\Http\Controllers\UtilityController as UC;
                                      aria-expanded="false"
                                      aria-controls="clps-target-groups-u{{$otherUser->id}}">
                                     {{--{{auth()->user()->first_name . "'s"}} --}}Groups
-                                    <span class="glyphicon glyphicon-chevron-down u-float-right u-ml1"
+                                    <span class="glyphicon glyphicon-chevron-up u-float-right u-ml1"
                                           id="glyph-flip-target-groups-u{{$otherUser->id}}"></span>
                                     <span class="label label-as-badge label-primary u-float-right">{{count($otherUserGroups)}}</span>
                                 </div>
@@ -175,4 +180,14 @@ use App\Http\Controllers\UtilityController as UC;
 
 @section('to-master-js')
     <script src="{{asset('js/resize-picture.js')}}"></script>
+    <script>
+        $(document).ready(function(){
+            setTimeout(function(){
+                var target = $('#clps-target-wishes-u'+{{$otherUser->id}});
+                target.collapse('show');
+                var target = $('#clps-target-groups-u'+{{$otherUser->id}});
+                target.collapse('show');
+            }, 500)
+        });
+    </script>
 @endsection
