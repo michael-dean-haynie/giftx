@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use \App\Http\Controllers\UtilityController as UC;
 use DB;
+use File;
 
 class PagesController extends Controller
 {
@@ -15,14 +16,14 @@ class PagesController extends Controller
             $dataModel['userWishes'] = DB::select("SELECT * FROM wishes WHERE user_id = ? ORDER BY priority ASC;", [auth()->user()->id]);
             $dataModel['userNotes'] = DB::select("
                 SELECT notes.note_id, notes.wish_id, notes.suggestion_id, notes.note_type,
-                notes.note, notes.updated_at, notes.created_at
+                notes.note, notes.updated_at
                 FROM notes
                 INNER JOIN wishes
                   ON notes.wish_id = wishes.wish_id AND wishes.user_id = ?
             ;", [auth()->user()->id]);
             $dataModel['userGroups'] = DB::select('
                 SELECT g.group_id, g.name, g.event_date, g.group_key,
-                g.group_leader_id, g.created_at, g.updated_at,
+                g.group_leader_id, g.updated_at,
                 CONCAT(u.first_name, " ", u.last_name) AS group_leader_name,
                 u.prof_pic_filename AS group_leader_filename,
                 (SELECT COUNT(*) FROM assoc_users_groups WHERE assoc_users_groups.group_id = g.group_id) AS member_count
@@ -34,7 +35,7 @@ class PagesController extends Controller
                 ORDER BY g.event_date ASC
             ;', [auth()->user()->id]);
             $dataModel['userAssignments'] = DB::select('
-                SELECT a.assignment_id, a.group_id, a.from_id, a.to_id, a.created_at, a.updated_at,
+                SELECT a.assignment_id, a.group_id, a.from_id, a.to_id, a.updated_at,
                 u.prof_pic_filename AS assignment_filename, CONCAT(u.first_name, " ", u.last_name) AS assignment_name,
                 g.name AS group_name
                 FROM assignments a
@@ -73,14 +74,14 @@ class PagesController extends Controller
             ;", [$userID]);
             $dataModel['otherUserNotes'] = DB::select("
                 SELECT notes.note_id, notes.wish_id, notes.suggestion_id, notes.note_type,
-                notes.note, notes.updated_at, notes.created_at
+                notes.note, notes.updated_at
                 FROM notes
                 INNER JOIN wishes
                   ON notes.wish_id = wishes.wish_id AND wishes.user_id = ?
             ;", [$userID]);
             $dataModel['otherUserGroups'] = DB::select('
                 SELECT g.group_id, g.name, g.event_date, g.group_key,
-                g.group_leader_id, g.created_at, g.updated_at,
+                g.group_leader_id, g.updated_at,
                 CONCAT(u.first_name, " ", u.last_name) AS group_leader_name,
                 u.prof_pic_filename AS group_leader_filename,
                 (SELECT COUNT(*) FROM assoc_users_groups WHERE assoc_users_groups.group_id = g.group_id) AS member_count
@@ -96,7 +97,7 @@ class PagesController extends Controller
         if (in_array('allGroups', $dataNames)){
             $dataModel['allGroups'] = DB::select('
                 SELECT DISTINCT g.group_id, g.name, g.event_date, g.group_key,
-                g.group_leader_id, g.created_at, g.updated_at,
+                g.group_leader_id, g.updated_at,
                 CONCAT(u.first_name, " ", u.last_name) AS group_leader_name,
                 u.prof_pic_filename AS group_leader_filename,
                 (SELECT COUNT(*) FROM assoc_users_groups WHERE assoc_users_groups.group_id = g.group_id) AS member_count
@@ -251,7 +252,7 @@ class PagesController extends Controller
         $dataModel['userWishes'] = DB::select("SELECT * FROM wishes WHERE user_id = ? ORDER BY priority ASC;", [auth()->user()->id]);
         $dataModel['userNotes'] = DB::select("
                 SELECT notes.note_id, notes.wish_id, notes.suggestion_id, notes.note_type,
-                notes.note, notes.updated_at, notes.created_at
+                notes.note, notes.updated_at
                 FROM notes
                 INNER JOIN wishes
                   ON notes.wish_id = wishes.wish_id AND wishes.user_id = ?
@@ -269,7 +270,7 @@ class PagesController extends Controller
             ;", [$userID]);
         $dataModel['otherUserNotes'] = DB::select("
                 SELECT notes.note_id, notes.wish_id, notes.suggestion_id, notes.note_type,
-                notes.note, notes.updated_at, notes.created_at
+                notes.note, notes.updated_at
                 FROM notes
                 INNER JOIN wishes
                   ON notes.wish_id = wishes.wish_id AND wishes.user_id = ?
@@ -374,10 +375,10 @@ class PagesController extends Controller
         $newName = 'user'.auth()->user()->id.'.'.$file->getClientOriginalExtension();
 
         /* Move file */
-        $file = $file->move(public_path()."/img/profile", $newName);
+//        $file = $file->move(public_path()."/img/profile", $newName);
 
         /* How I did it ^ in artisthomepage2 */
-//        $file = $file->move(/*public_path() . '\*/'items', $newName);
+        $file = $file->move(/*public_path() . '\*/'img/profile', $newName);
 
         /* Update users Table*/
         DB::update('
@@ -391,8 +392,8 @@ class PagesController extends Controller
 
     public function postDeletePicture(){
         /* Delete Picture */
-        if (file_exists(public_path().'/img/profile/'.auth()->user()->prof_pic_filename)){
-            unlink(public_path().'/img/profile/'.auth()->user()->prof_pic_filename);
+        if (file_exists('img/profile/'.auth()->user()->prof_pic_filename)){
+            File::delete('img/profile/'.auth()->user()->prof_pic_filename);
         }
         return redirect()->back()->with('status',
             "I thought you looked great, but whatevs...");
@@ -414,12 +415,12 @@ class PagesController extends Controller
         $newFilename = 'user'.auth()->user()->id.'.png';
 
         /* Test for and delete old file */
-        if (file_exists(public_path()."/img/profile/".$newFilename/*$profPicFilename*/)){
-            unlink(public_path()."/img/profile/".$newFilename);
+        if (/*file_exists(public_path()."/img/profile/".$newFilename*/'img/profile/'.$newFilename){
+            File::delete(/*public_path()."/img/profile/".$newFilename*/'img/profile/'.$newFilename);
         }
 
         /* Create file write to it and close it */
-        $fp = fopen(public_path()."/img/profile/".$newFilename, 'wb' );
+        $fp = fopen(/*public_path()."/img/profile/".$newFilename*/'img/profile/'.$newFilename, 'wb' );
         fwrite( $fp, $decodedData);
         fclose( $fp );
 

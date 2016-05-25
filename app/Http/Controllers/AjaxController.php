@@ -70,7 +70,7 @@ class AjaxController extends Controller
         if ($input['chat-type'] === 'user'){
             $output['messages'] = DB::select('
             SELECT m.message, m.from_id,CONCAT(u.first_name, " ", u.last_name) AS from_name,
-            u.prof_pic_filename AS from_filename, m.created_at, m.message_id, "user" AS chat_type,
+            u.prof_pic_filename AS from_filename, m.updated_at, m.message_id, "user" AS chat_type,
             ? AS chat_id
             FROM messages m
             INNER JOIN users u
@@ -84,7 +84,7 @@ class AjaxController extends Controller
         }elseif ($input['chat-type'] === 'group'){
             $output['messages'] = DB::select('
             SELECT m.message, m.from_id,CONCAT(u.first_name, " ", u.last_name) AS from_name,
-            u.prof_pic_filename AS from_filename, m.message_id, m.created_at, m.message_id, "group" AS chat_type,
+            u.prof_pic_filename AS from_filename, m.message_id, m.updated_at, m.message_id, "group" AS chat_type,
             ? AS chat_id
             FROM messages m
             INNER JOIN users u
@@ -96,7 +96,7 @@ class AjaxController extends Controller
         }
 
         foreach($output['messages'] as $message){
-            $message->created_at = UC::toMessageDateTime($message->created_at);
+            $message->updated_at = UC::toMessageDateTime($message->updated_at);
         }
 
         return json_encode($output);
@@ -109,7 +109,7 @@ class AjaxController extends Controller
         if ($input['chat-type'] === 'user') {
             $output['messages'] = DB::select('
             SELECT m.message, m.from_id,CONCAT(u.first_name, " ", u.last_name) AS from_name,
-            u.prof_pic_filename AS from_filename, m.created_at, m.message_id, "user" AS chat_type,
+            u.prof_pic_filename AS from_filename, m.updated_at, m.message_id, "user" AS chat_type,
             ? AS chat_id
             FROM messages m
             INNER JOIN users u
@@ -122,7 +122,7 @@ class AjaxController extends Controller
         }elseif ($input['chat-type'] === 'group'){
             $output['messages'] = DB::select('
             SELECT m.message, m.from_id,CONCAT(u.first_name, " ", u.last_name) AS from_name,
-            u.prof_pic_filename AS from_filename, m.message_id, m.created_at, m.message_id, "group" AS chat_type,
+            u.prof_pic_filename AS from_filename, m.message_id, m.updated_at, m.message_id, "group" AS chat_type,
             ? AS chat_id
             FROM messages m
             INNER JOIN users u
@@ -134,7 +134,7 @@ class AjaxController extends Controller
         }
 
         foreach($output['messages'] as $message){
-            $message->created_at = UC::toMessageDateTime($message->created_at);
+            $message->updated_at = UC::toMessageDateTime($message->updated_at);
         }
 
         return json_encode($output);
@@ -153,7 +153,7 @@ class AjaxController extends Controller
         if ($input['chat-type'] === 'user') {
             $output['messages'] = DB::select('
             SELECT m.message, m.from_id,CONCAT(u.first_name, " ", u.last_name) AS from_name,
-            u.prof_pic_filename AS from_filename, m.created_at, m.message_id, "user" AS chat_type,
+            u.prof_pic_filename AS from_filename, m.updated_at, m.message_id, "user" AS chat_type,
             ? AS chat_id
             FROM messages m
             INNER JOIN users u
@@ -166,7 +166,7 @@ class AjaxController extends Controller
         }elseif ($input['chat-type'] === 'group'){
             $output['messages'] = DB::select('
             SELECT m.message, m.from_id,CONCAT(u.first_name, " ", u.last_name) AS from_name,
-            u.prof_pic_filename AS from_filename, m.message_id, m.created_at, m.message_id, "group" AS chat_type,
+            u.prof_pic_filename AS from_filename, m.message_id, m.updated_at, m.message_id, "group" AS chat_type,
             ? AS chat_id
             FROM messages m
             INNER JOIN users u
@@ -178,7 +178,7 @@ class AjaxController extends Controller
         }
 
         foreach($output['messages'] as $message){
-            $message->created_at = UC::toMessageDateTime($message->created_at);
+            $message->updated_at = UC::toMessageDateTime($message->updated_at);
         }
 
         return json_encode($output);
@@ -191,7 +191,7 @@ class AjaxController extends Controller
         if ($input['chat-type'] === 'user') {
             $output['messages'] = DB::select('
             SELECT m.message, m.from_id,CONCAT(u.first_name, " ", u.last_name) AS from_name,
-            u.prof_pic_filename AS from_filename, m.created_at, m.message_id, "user" AS chat_type,
+            u.prof_pic_filename AS from_filename, m.updated_at, m.message_id, "user" AS chat_type,
             ? AS chat_id
             FROM messages m
             INNER JOIN users u
@@ -204,7 +204,7 @@ class AjaxController extends Controller
         }elseif ($input['chat-type'] === 'group'){
             $output['messages'] = DB::select('
             SELECT m.message, m.from_id,CONCAT(u.first_name, " ", u.last_name) AS from_name,
-            u.prof_pic_filename AS from_filename, m.message_id, m.created_at, m.message_id, "group" AS chat_type,
+            u.prof_pic_filename AS from_filename, m.message_id, m.updated_at, m.message_id, "group" AS chat_type,
             ? AS chat_id
             FROM messages m
             INNER JOIN users u
@@ -216,7 +216,7 @@ class AjaxController extends Controller
         }
 
         foreach($output['messages'] as $message){
-            $message->created_at = UC::toMessageDateTime($message->created_at);
+            $message->updated_at = UC::toMessageDateTime($message->updated_at);
         }
 
         return json_encode($output);

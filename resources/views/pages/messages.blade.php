@@ -124,13 +124,29 @@ use App\Http\Controllers\UtilityController as UC;
                         </div>" : "")+
                     "<span class='message-text-container u-dib'>\
                         "+message+"<br>\
-                            <span class='u-dib message-info u-float-right'><a href=''>"+row.from_name+"</a> at "+row.created_at+"</span>\
+                            <span class='u-dib message-info u-float-right'><a href='{{url('/user')}}/"+row.from_id+"'>"+row.from_name+"</a> at "+row.updated_at+"</span>\
                         </span>"+
                     "&nbsp;&nbsp;"+
                     (fromID == {{auth()->user()->id}} ? "<div class='message-pic-container u-dib'>\
                             <img src='{{asset('img/profile')}}"+filename+"'\
                             class='img-rounded u-fis5'>\
                         </div>" : "")+
+                    "</div>\
+                    ";
+
+            if (prepend){
+                chatContainer.prepend(html);
+            }else{
+                chatContainer.append(html);
+            }
+        }
+
+        function addHiddenMessage(chatType, chatID, chatContainer, prepend){
+            var html = "\
+                    <div class='message-container message-container-hidden"+
+                    "' data-chat-type='"+chatType+"'"+
+                    "' data-chat-id='"+chatID+"'"+
+                    "' data-message-id='0'>"+
                     "</div>\
                     ";
 
@@ -162,6 +178,9 @@ use App\Http\Controllers\UtilityController as UC;
                     var fromID = json.messages[m].from_id;
                     var filename = (row.from_filename === 'null' ? '/default.png' : '/'+row.from_filename);
                     addMessage(row, fromID, filename, message, chatContainer, true);
+                }
+                if (json.messages.length < 1){
+                    addHiddenMessage(chatType, chatID, chatContainer, true);
                 }
                 scrollToBottom(false);
             })

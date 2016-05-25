@@ -1,4 +1,4 @@
-@if(file_exists(public_path().'/img/profile/'.$filename))
+@if(file_exists('img/profile/'.$filename))
     <img src="{{asset('img/profile/'.$filename)}}"
          alt="Profile Picture" class="img-rounded {{$class}}"
             {{isset($id) ? 'id=' . $id . '' : ''}}>
